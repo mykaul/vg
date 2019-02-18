@@ -1,0 +1,78 @@
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: Install additional packages
+      yum:
+        name: ['cockpit', 'udisks2', 'cockpit-storaged', 'policycoreutils-python', 'python-requests', 'python-jwt']
+        state: present
+      retries: 10
+      delay: 5
+    - name: Setup root user, password 'foobar', create SSH key
+      user:
+        name: root
+        password: "{{ 'foobar' | password_hash('sha512') }}"
+        append: true
+        group: wheel
+        shell: /bin/bash
+        update_password: always
+        generate_ssh_key: true
+    - name: Edit sshd_config file
+      lineinfile:
+        path: '/etc/ssh/sshd_config'
+        state: present
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: '^PasswordAuthentication\s+no', line: 'PasswordAuthentication yes' }
+        - { regexp: '^[#]*PubkeyAuthentication\s+yes', line: 'PubkeyAuthentication yes' }
+        - { regexp: '^[#]*PermitRootLogin\s+yes', line: 'PermitRootLogin yes' }
+    - name: Restart SSHd
+      systemd:
+        name: 'sshd'
+        daemon_reload: yes
+        state: restarted
+    - name: Add EPEL repository
+      yum_repository:
+       name: epel
+       description: EPEL YUM repo
+       mirrorlist: https://mirrors.fedoraproject.org/mirrorlist?repo=epel-7&arch=$basearch
+       enabled: yes
+       gpgcheck: no
+       keepalive: yes
+    - name: Configure Gluster-Ansible sac repo
+      yum_repository:
+        name: "sac-gluster-ansible-epel-7"
+        description: "Copr repo for gluster-ansible owned by sac"
+        baseurl: "https://copr-be.cloud.fedoraproject.org/results/sac/gluster-ansible/epel-7-$basearch/"
+        gpgkey: "https://copr-be.cloud.fedoraproject.org/results/sac/gluster-ansible/pubkey.gpg"
+        keepalive: yes
+    - name: Configure Gluster master nightly repo
+      yum_repository:
+        name: "gluster-nightly-master"
+        description: "Gluster Nightly builds (master branch)"
+        baseurl: "http://artifacts.ci.centos.org/gluster/nightly/master/$releasever/$basearch"
+        gpgcheck: false
+        keepalive: yes
+    - name: Install Gluster packages
+      yum:
+        name: ['gluster-ansible', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api']
+        state: present
+        update_cache: yes
+      retries: 10
+      delay: 5
+    - name: Restart services
+      systemd:
+        name: "{{ item }}"
+        daemon_reload: yes
+        state: restarted
+      with_items:
+       - 'cockpit'
+       - 'udisks2'
+       - 'glusterd'
+- hosts: node-1
+  gather_facts: false
+  tasks:
+    - name: distribute SSH key
+      command: "{{ item }}"
+      with_sequence: start=1 end=3 format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"
