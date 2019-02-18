@@ -45,7 +45,7 @@
 
   - name: upgrade python packagess using pip
     pip:
-      name: ['setuptools', 'six']
+      name: ['setuptools', 'six', 'python-docx']
       extra_args: --upgrade
 
   - name: setup glusto-test
