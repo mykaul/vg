@@ -32,10 +32,10 @@ Vagrant.configure(2) do |config|
           lvt.cpus = "#{cpus}"
           lvt.nested = false
           lvt.cpu_mode = "host-passthrough"
-          lvt.volume_cache = "none"
+          lvt.volume_cache = "writeback"
           lvt.graphics_type = "none"
           lvt.video_type = "vga"
-          lvt.video_vram = 4
+          lvt.video_vram = 1
           # lvt.usb_controller :model => "none"  # (requires vagrant-libvirt 0.44 which is not in Fedora yet)
           lvt.random :model => 'random'
           lvt.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :target_type => 'virtio'
