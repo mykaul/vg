@@ -43,12 +43,12 @@
       - {repo: "http://review.gluster.org/glusto-tests", dest: "~/glusto-tests" }
       - {repo: "https://github.com/loadtheaccumulator/glusto.git", dest: "~/glusto" }
 
-  - name: upgrade python packagess using pip
+  - name: Install and upgrade python packagess using pip
     pip:
-      name: ['setuptools', 'six', 'python-docx']
+      name: ['setuptools', 'six', 'python-docx', 'tox']
       extra_args: --upgrade
 
-  - name: setup glusto-test
+  - name: Setup glusto
     command: python setup.py install
     args:
       chdir: "{{ item }}"
