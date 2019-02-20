@@ -8,13 +8,24 @@ disk_size = 501 #GB
 cpus = 2
 memory = 1024
 
-node_count = 3
+node_count = 3 # node-0 is our client.
 
 Vagrant.configure(2) do |config|
     puts "Creating #{node_count} nodes."
     puts "Creating #{node_data_disk_count} data disks (#{disk_size}G) each."
 
-    (1..node_count).reverse_each do |num|
+    require "fileutils"
+    f = File.open("dist/hosts","w")
+        (0..node_count).each do |num|
+      f.puts "node-#{num} ansible_host=192.168.250.#{num+10}"
+    end
+    f.puts "[gluster_servers]"
+    (1..node_count).each do |num|
+      f.puts "node-#{num} ansible_host=192.168.250.#{num+10}"
+    end
+    f.close
+
+    (0..node_count).reverse_each do |num|
       config.vm.define "node-#{num}" do |node|
         vm_ip = "192.168.250.#{num+10}"
 
@@ -40,49 +51,45 @@ Vagrant.configure(2) do |config|
           lvt.random :model => 'random'
           lvt.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :target_type => 'virtio'
           #disk_config
-          disks = []
-          (2..(node_data_disk_count+1)).each do |d|
-            lvt.storage :file, :device => "vd#{driveletters[d]}", :size => "#{disk_size}G"
-            disks.push "/dev/vd#{driveletters[d]}"
-	  end #disks
+          if num != 0
+            disks = []
+            (1..(node_data_disk_count)).each do |d|
+              lvt.storage :file, :device => "vd#{driveletters[d]}", :size => "#{disk_size}G"
+              disks.push "/dev/vd#{driveletters[d]}"
+	    end #disks
+          end
 
         end #libvirt
+
+        if num == 0
+          node.vm.synced_folder "./dist", "/vagrant", type: "rsync", create: true, rsync__args: ["--verbose", "--archive", "--delete", "-z"]
+          node.vm.network "forwarded_port", guest: 9090, host: 9091
+          node.vm.post_up_message << "You can now access Cockpit at http://localhost:9091 (login as 'root' with password 'foobar')"
+        end
 
 	# Prepare VMs and deploy Gluster packages on all of them.
 	node.vm.provision "ansible" do |ansible|
 	  ansible.become = true
 	  ansible.playbook = "ansible/machine_config.yml"
 	  ansible.verbose = false
-	  #ansible.groups = {
-	  #  "gluster_servers" => "node-1:#{node_count}"
-	  #}
+          ansible.inventory_path = "dist/hosts"
         end
-	# Deploy Glusto and Gluster using Gluster-Ansible via node-1
-	if num == 1
-          node.vm.synced_folder "./dist", "/vagrant", type: "rsync", create: true, rsync__args: ["--verbose", "--archive", "--delete", "-z"]
-          node.vm.network "forwarded_port", guest: 9090, host: 9091
-          node.vm.post_up_message << "You can now access Cockpit at http://localhost:9091 (login as 'root' with password 'foobar')"
-
+	# Deploy Glusto and Gluster using Gluster-Ansible via node-0
+	if num == 0
           node.vm.provision "ansible" do |ansible|
             ansible.become = true
             ansible.playbook = "ansible/glusto.yml"
-            ansible.limit = "node-1"
+            ansible.limit = "node-0"
             ansible.verbose = false
           end
 
 	  node.vm.provision "shell", inline: <<-SHELL
             set -u
 
-            if [[ #{num} -eq 1 ]]
+            if [[ #{num} -eq 0 ]]
 	    then
-              echo "Preparing static inventory file..."
-              echo "node-1 ansible_connection=local" >> /tmp/inventory.hosts
-              echo "[gluster_servers]" >> /tmp/inventory.hosts
-              echo "node-[1:#{node_count}]" >> /tmp/inventory.hosts
-
-              echo "Running Gluster Ansible on node-1 to deploy Gluster..."
-              PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ANSIBLE_CONFIG='/vagrant/ansible.cfg' ansible-playbook --limit="gluster_servers" --inventory-file=/tmp/inventory.hosts /vagrant/gluster.yml
-              sudo gluster pool list
+              echo "Running Gluster Ansible on node-0 to deploy Gluster..."
+              PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ANSIBLE_CONFIG='/vagrant/ansible.cfg' ansible-playbook --limit="gluster_servers" --inventory-file=/vagrant/hosts /vagrant/gluster.yml
             fi
             SHELL
 	  end

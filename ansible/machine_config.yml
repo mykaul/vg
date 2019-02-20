@@ -2,12 +2,6 @@
 - hosts: all
   gather_facts: false
   tasks:
-    - name: Install additional packages
-      yum:
-        name: ['cockpit', 'udisks2', 'cockpit-storaged', 'policycoreutils-python', 'python-requests', 'python-jwt']
-        state: present
-      retries: 10
-      delay: 5
     - name: Setup root user, password 'foobar', create SSH key
       user:
         name: root
@@ -54,9 +48,12 @@
         baseurl: "http://artifacts.ci.centos.org/gluster/nightly/master/$releasever/$basearch"
         gpgcheck: false
         keepalive: yes
-    - name: Install Gluster packages
+- hosts: gluster_servers
+  gather_facts: false
+  tasks:
+    - name: Install Gluster and additional packages on servers
       yum:
-        name: ['gluster-ansible', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api']
+        name: ['cockpit', 'udisks2', 'cockpit-storaged', 'policycoreutils-python', 'python-requests', 'python-jwt', 'gluster-ansible', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api']
         state: present
         update_cache: yes
       retries: 10
@@ -70,9 +67,16 @@
        - 'cockpit'
        - 'udisks2'
        - 'glusterd'
-- hosts: node-1
+- hosts: node-0
   gather_facts: false
   tasks:
+    - name: Install Gluster-ansible and additional packages on client
+      yum:
+        name: ['gluster-ansible', 'sshpass']
+        state: present
+        update_cache: yes
+      retries: 10
+      delay: 5
     - name: distribute SSH key
       command: "{{ item }}"
-      with_sequence: start=1 end=3 format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"
+      with_sequence: start=0 end=3 format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"
