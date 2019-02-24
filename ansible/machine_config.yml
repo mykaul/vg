@@ -79,4 +79,4 @@
       delay: 5
     - name: distribute SSH key
       command: "{{ item }}"
-      with_sequence: start=0 end=3 format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"
+      with_sequence: start=0 end={{ node_count }} format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"

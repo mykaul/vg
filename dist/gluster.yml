@@ -52,7 +52,7 @@
      gluster_cluster_transport: 'tcp'
      gluster_cluster_force: 'yes'
      gluster_cluster_bricks: '/mnt/thicklv/testvol,/mnt/thinlv1'
-     gluster_cluster_replica_count: 3
+     gluster_cluster_replica_count: "{{ node_count }}"
 
   roles:
      - gluster.infra
