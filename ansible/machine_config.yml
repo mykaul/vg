@@ -53,7 +53,7 @@
   tasks:
     - name: Install Gluster and additional packages on servers
       yum:
-        name: ['cockpit', 'udisks2', 'cockpit-storaged', 'policycoreutils-python', 'python-requests', 'python-jwt', 'gluster-ansible-roles', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api']
+        name: ['policycoreutils-python', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api']
         state: present
         update_cache: yes
       retries: 10
@@ -64,19 +64,17 @@
         daemon_reload: yes
         state: restarted
       with_items:
-       - 'cockpit'
-       - 'udisks2'
        - 'glusterd'
 - hosts: node-0
   gather_facts: false
   tasks:
     - name: Install Gluster-ansible and additional packages on client
       yum:
-        name: ['gluster-ansible-roles', 'sshpass']
+        name: ['gluster-ansible-roles', 'glusterfs-server','sshpass']
         state: present
         update_cache: yes
       retries: 10
       delay: 5
     - name: distribute SSH key
       command: "{{ item }}"
-      with_sequence: start=0 end={{ node_count }} format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"
+      with_sequence: start=0 end=4 format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"

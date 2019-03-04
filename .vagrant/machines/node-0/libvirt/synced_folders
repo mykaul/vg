@@ -1,1 +1,0 @@
-{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"/home/hsharon/Desktop/workspace/vg/dist","disabled":false,"create":true,"rsync__args":["--verbose","--archive","--delete","-z"],"__vagrantfile":true,"args":["--verbose","--archive","--delete","-z"],"owner":"vagrant","group":"vagrant"}}}

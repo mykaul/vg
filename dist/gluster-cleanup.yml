@@ -1,0 +1,24 @@
+---
+- name: Reset the bricks
+  remote_user: root
+  hosts: gluster_servers
+  vars:
+    - gluster_volumes: testvol
+#    - gluster_infra_reset_mnt_paths:
+#       - /mnt/thicklv
+#       - /mnt/thinlv1
+#       - /mnt/thinlv2
+    - gluster_infra_volume_groups:
+       - { vgname: 'vg_vdb', pvname: '/dev/vdb' }
+       - { vgname: 'vg_vdc', pvname: '/dev/vdc' }
+
+  pre_tasks:
+    - name: Delete Gluster volume(s)
+      gluster_volume:
+         state: absent
+         name: "{{ item }}"
+      with_items: "{{ gluster_volumes }}"
+      run_once: true
+
+  roles:
+    - gluster.infra
