@@ -53,7 +53,7 @@
   tasks:
     - name: Install Gluster and additional packages on servers
       yum:
-        name: ['cockpit', 'udisks2', 'cockpit-storaged', 'policycoreutils-python', 'python-requests', 'python-jwt', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api']
+        name: ['policycoreutils-python', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api']
         state: present
         update_cache: yes
       retries: 10
@@ -64,8 +64,6 @@
         daemon_reload: yes
         state: restarted
       with_items:
-       - 'cockpit'
-       - 'udisks2'
        - 'glusterd'
 - hosts: node-0
   gather_facts: false

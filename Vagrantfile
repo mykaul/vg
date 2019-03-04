@@ -63,8 +63,7 @@ Vagrant.configure(2) do |config|
 
         if num == 0
           node.vm.synced_folder "./dist", "/vagrant", type: "rsync", create: true, rsync__args: ["--verbose", "--archive", "--delete", "-z"]
-          node.vm.network "forwarded_port", guest: 9090, host: 9091
-          node.vm.post_up_message << "You can now access Cockpit at http://localhost:9091 (login as 'root' with password 'foobar')"
+          node.vm.post_up_message << "\nYou can now access the nodes (credential for root is 'foobar')"
         end
 
 	# Prepare VMs and deploy Gluster packages on all of them.
