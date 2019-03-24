@@ -1,0 +1,13 @@
+---
+- name: Setting up backend
+  remote_user: root
+  hosts: gluster_servers
+  vars:
+     gluster_cluster_hosts: "{{ groups['gluster_servers'] }}"
+     gluster_cluster_volume: 'testvol'
+     gluster_cluster_state: absent
+     #gluster_cluster_remove_bricks: '/mnt/thicklv/testvol,/mnt/thinlv1'
+
+  roles:
+     - gluster.cluster
+
