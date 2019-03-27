@@ -70,7 +70,7 @@
   tasks:
     - name: Install Gluster-ansible and additional packages on client
       yum:
-        name: ['gluster-ansible-roles', 'sshpass']
+        name: ['gluster-ansible-roles', 'sshpass', 'glusterfs-fuse']
         state: present
         update_cache: yes
       retries: 10
