@@ -1,0 +1,4 @@
+dist/glusto.yml
+dist/hosts
+.vagrant/
+*.retry
