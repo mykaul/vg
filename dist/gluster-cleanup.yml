@@ -1,13 +1,16 @@
 ---
-- name: Setting up backend
+- name: Remove testvol volume
   remote_user: root
   hosts: gluster_servers
   vars:
-     gluster_cluster_hosts: "{{ groups['gluster_servers'] }}"
-     gluster_cluster_volume: 'testvol'
-     gluster_cluster_state: absent
-     #gluster_cluster_remove_bricks: '/mnt/thicklv/testvol,/mnt/thinlv1'
+    - gluster_volumes: testvol
+    - gluster_infra_volume_groups:
+      - { vgname: 'vg_vdb', pvname: '/dev/vdb' }
+      - { vgname: 'vg_vdc', pvname: '/dev/vdc' }
 
-  roles:
-     - gluster.cluster
-
+  tasks:
+    - name: Delete Gluster volume(s)
+      gluster_volume:
+         state: absent
+         name: testvol
+      run_once: true
