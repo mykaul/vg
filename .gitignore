@@ -1,4 +1,4 @@
 dist/glusto.yml
-dist/hosts
+dist/hosts.ini
 .vagrant/
 *.retry
