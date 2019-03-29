@@ -53,11 +53,29 @@
   tasks:
     - name: Install Gluster and additional packages on servers
       yum:
-        name: ['policycoreutils-python', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api']
+        name: ['policycoreutils-python', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api', 'samba-vfs-glusterfs', 'glusterfs-gnfs', 'samba-client']
         state: present
         update_cache: yes
       retries: 10
       delay: 5
+    - name: Setup SELinux for Samba
+      seboolean: name=samba_load_libgfapi state=yes persistent=yes
+    - name: Setup SELinux in permissive mode
+      selinux: policy=targeted state=enforcing
+    - name: Setup Samba credentials
+      shell: (echo "foobar"; echo "foobar") | smbpasswd -a root
+    - name: Setup Samba configuration
+      blockinfile:
+        dest: /etc/samba/smb.conf
+        insertafter: '\[global\]'
+        content: |
+          kernel share modes = no
+          kernel oplocks = no
+          map archive = no
+          map hidden = no
+          map read only = no
+          map system = no
+          store dos attributes = yes
     - name: Restart services
       systemd:
         name: "{{ item }}"
@@ -65,12 +83,14 @@
         state: restarted
       with_items:
        - 'glusterd'
+       - 'smb'
+       - 'rpcbind'
 - hosts: node-0
   gather_facts: false
   tasks:
     - name: Install Gluster-ansible and additional packages on client
       yum:
-        name: ['gluster-ansible-roles', 'sshpass', 'glusterfs-fuse']
+        name: ['gluster-ansible-roles', 'sshpass', 'glusterfs-fuse', 'samba-client']
         state: present
         update_cache: yes
       retries: 10
