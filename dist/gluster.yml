@@ -13,6 +13,7 @@
        - 16514/tcp
      gluster_infra_fw_services:
        - glusterfs
+       - samba
 
      # Set a disk type, Options: JBOD, RAID6, RAID10
      gluster_infra_disktype: JBOD
@@ -52,8 +53,8 @@
      gluster_cluster_status: absent
      gluster_cluster_transport: 'tcp'
      gluster_cluster_force: 'yes'
-     gluster_cluster_bricks: '/mnt/thicklv/testvol,/mnt/thinlv1'
-     gluster_cluster_replica_count: 4
+     gluster_cluster_bricks: '/mnt/thicklv/testvol,/mnt/thinlv1/testvol'
+     gluster_cluster_replica_count: "{{ node_count }}"
 
   roles:
      - gluster.infra
