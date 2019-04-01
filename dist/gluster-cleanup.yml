@@ -15,7 +15,7 @@
   pre_tasks:
     - name: Delete Gluster volume(s)
       gluster_volume:
-                  state: absent
+         state: absent
          name: "{{ item }}"
       with_items: "{{ gluster_volumes }}"
       run_once: true
