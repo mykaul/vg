@@ -1,4 +1,5 @@
 .vagrant/
-hadar_test_config.yml
-test_basic_hadar.py
 dist/glusto.yml
+dist/hosts.ini
+.vagrant/
+*.retry
