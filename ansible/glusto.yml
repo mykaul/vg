@@ -32,9 +32,6 @@
       name: pip
       extra_args: --upgrade
 
-      #  - name: enable copr repo
-      #shell: yum copr enable sac/gdeploy -y
-
   - name: clone glusto, glusto-tests
     git:
       repo: "{{ item.repo }}"
