@@ -1,16 +1,9 @@
 ---
 - name: Remove testvol volume
   remote_user: root
-  hosts: gluster_servers
-  vars:
-    - gluster_volumes: testvol
-    - gluster_infra_volume_groups:
-      - { vgname: 'vg_vdb', pvname: '/dev/vdb' }
-      - { vgname: 'vg_vdc', pvname: '/dev/vdc' }
-
+  hosts: node-1
   tasks:
     - name: Delete Gluster volume(s)
       gluster_volume:
          state: absent
          name: testvol
-      run_once: true
