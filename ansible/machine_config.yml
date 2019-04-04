@@ -28,12 +28,48 @@
         state: restarted
     - name: Add EPEL repository
       yum_repository:
-       name: epel
-       description: EPEL YUM repo
-       mirrorlist: https://mirrors.fedoraproject.org/mirrorlist?repo=epel-7&arch=$basearch
-       enabled: yes
-       gpgcheck: no
-       keepalive: yes
+        name: epel
+        description: EPEL YUM repo
+        mirrorlist: https://mirrors.fedoraproject.org/mirrorlist?repo=epel-7&arch=$basearch
+        enabled: yes
+        gpgcheck: no
+        keepalive: yes
+    - name: Setup arequal repo
+      yum_repository:
+        name: nigelbabu-arequal
+        description: Copr repo for arequal
+        baseurl: https://copr-be.cloud.fedoraproject.org/results/nigelbabu/arequal/epel-7-$basearch/
+        gpgcheck: yes
+        gpgkey: https://copr-be.cloud.fedoraproject.org/results/nigelbabu/arequal/pubkey.gpg
+        repo_gpgcheck: no
+    - name: Configure Gluster master nightly repo
+      yum_repository:
+        name: "gluster-nightly-master"
+        description: "Gluster Nightly builds (master branch)"
+        baseurl: "http://artifacts.ci.centos.org/gluster/nightly/master/$releasever/$basearch"
+        gpgcheck: false
+        repo_gpgcheck: false
+        keepalive: yes
+- hosts: gluster_servers
+  gather_facts: false
+  tasks:
+    - name: Install Gluster and additional packages on servers
+      yum:
+        name: ['policycoreutils-python', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api', 'arequal']
+        state: present
+        update_cache: yes
+      retries: 10
+      delay: 5
+    - name: Restart services
+      systemd:
+        name: "{{ item }}"
+        daemon_reload: yes
+        state: restarted
+      with_items:
+       - 'glusterd'
+- hosts: node-0
+  gather_facts: false
+  tasks:
     - name: Configure Gluster-Ansible sac repo
       yum_repository:
         name: "sac-gluster-ansible-epel-7"
@@ -41,21 +77,23 @@
         baseurl: "https://copr-be.cloud.fedoraproject.org/results/sac/gluster-ansible/epel-7-$basearch/"
         gpgkey: "https://copr-be.cloud.fedoraproject.org/results/sac/gluster-ansible/pubkey.gpg"
         keepalive: yes
-    - name: Configure Gluster master nightly repo
-      yum_repository:
-        name: "gluster-nightly-master"
-        description: "Gluster Nightly builds (master branch)"
-        baseurl: "http://artifacts.ci.centos.org/gluster/nightly/master/$releasever/$basearch"
-        gpgcheck: false
-        keepalive: yes
-- hosts: gluster_servers
-  gather_facts: false
-  tasks:
-    - name: Install Gluster and additional packages on servers
+    - name: Install Gluster-ansible and additional packages on client
       yum:
-        name: ['policycoreutils-python', 'python-gluster-mgmt-client', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api', 'samba-vfs-glusterfs', 'glusterfs-gnfs', 'samba-client']
+        name: ['gluster-ansible-roles', 'sshpass', 'glusterfs-fuse', 'cifs-utils', 'arequal']
         state: present
         update_cache: yes
+      retries: 10
+      delay: 5
+    - name: distribute SSH key
+      command: "{{ item }}"
+      with_sequence: start=0 end={{ node_count }} format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"
+- hosts: node-1
+  gather_facts: false
+  tasks:
+    - name: Install Samba related packages
+      yum:
+        name: ['samba-vfs-glusterfs', 'samba-client', 'ctdb']
+        state: present
       retries: 10
       delay: 5
     - name: Setup SELinux for Samba
@@ -76,25 +114,8 @@
           map read only = no
           map system = no
           store dos attributes = yes
-    - name: Restart services
+    - name: start SMB related services
       systemd:
-        name: "{{ item }}"
+        name: 'smb'
         daemon_reload: yes
         state: restarted
-      with_items:
-       - 'glusterd'
-       - 'smb'
-       - 'rpcbind'
-- hosts: node-0
-  gather_facts: false
-  tasks:
-    - name: Install Gluster-ansible and additional packages on client
-      yum:
-        name: ['gluster-ansible-roles', 'sshpass', 'glusterfs-fuse', 'samba-client']
-        state: present
-        update_cache: yes
-      retries: 10
-      delay: 5
-    - name: distribute SSH key
-      command: "{{ item }}"
-      with_sequence: start=0 end={{ node_count }} format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"
