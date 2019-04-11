@@ -57,7 +57,6 @@
       yum:
         name: ['policycoreutils-python', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api', 'arequal']
         state: present
-        update_cache: yes
       retries: 10
       delay: 5
     - name: Restart services
@@ -81,7 +80,6 @@
       yum:
         name: ['gluster-ansible-roles', 'sshpass', 'glusterfs-fuse', 'cifs-utils', 'arequal']
         state: present
-        update_cache: yes
       retries: 10
       delay: 5
     - name: distribute SSH key

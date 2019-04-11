@@ -37,9 +37,10 @@
       repo: "{{ item.repo }}"
       dest: "{{ item.dest }}"
     with_items:
-      - {repo: "http://review.gluster.org/glusto-tests", dest: "~/glusto-tests" }
+      - {repo: "https://review.gluster.org/glusto-tests", dest: "~/glusto-tests" }
       - {repo: "https://github.com/loadtheaccumulator/glusto.git", dest: "~/glusto" }
-
+    retries: 10
+    delay: 5
   - name: Install and upgrade python packagess using pip
     pip:
       name: ['setuptools', 'six', 'python-docx', 'tox']
