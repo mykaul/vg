@@ -103,7 +103,9 @@ Vagrant.configure(2) do |config|
 	  ansible.verbose = false
           ansible.inventory_path = "dist/hosts.ini"
           ansible.extra_vars = {
-            node_count: "#{node_count}"
+            node_count: "#{node_count}",
+            servers: (1..node_count).map { |n| "node-#{n}" % n },
+            clients: ["node-0"]
           }
         end
 	# Deploy Glusto and Gluster using Gluster-Ansible via node-0
