@@ -5,10 +5,10 @@
 node_data_disk_count = 4
 driveletters = ('a'..'z').to_a
 disk_size = 501 #GB
-cpus = 2
-memory = 1024
+cpus = 1
+memory = 824
 
-node_count = 4 # node-0 is our client.
+node_count = 6 # node-0 is our client.
 
 Vagrant.configure(2) do |config|
     puts "Creating #{node_count} nodes."
@@ -49,6 +49,9 @@ Vagrant.configure(2) do |config|
     g.puts "      dist_count: 2"
     g.puts "      replica_count: 2"
     g.puts "      transport: \"tcp\""
+    #g.puts "  smb_share_options:"
+    #g.puts "    group: \"metadata-cache\""
+    #g.puts "    cache-samba-metadata: \"on\""
     f.close
     g.close
 
@@ -66,6 +69,7 @@ Vagrant.configure(2) do |config|
         node.vm.hostname = "node-#{num}"
 
         node.vm.provider "libvirt" do |lvt|
+          lvt.qemu_use_session = false
           lvt.storage_pool_name = "default"
           lvt.memory = "#{memory}"
           lvt.cpus = "#{cpus}"
@@ -75,16 +79,14 @@ Vagrant.configure(2) do |config|
           lvt.graphics_type = "none"
           lvt.video_type = "vga"
           lvt.video_vram = 1
-          # lvt.usb_controller :model => "none"  # (requires vagrant-libvirt 0.44 which is not in Fedora yet)
+          #lvt.usb_controller :model => "none"  # (requires vagrant-libvirt >= 0.44 which is in Fedora 30 only)
           lvt.random :model => 'random'
           lvt.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :target_type => 'virtio'
           #disk_config
           if num != 0
-            disks = []
             (1..(node_data_disk_count)).each do |d|
-              lvt.storage :file, :device => "vd#{driveletters[d]}", :size => "#{disk_size}G"
-              disks.push "/dev/vd#{driveletters[d]}"
-	    end #disks
+              lvt.storage :file, :size => "#{disk_size}G", :serial => "#{d}"
+	    end #disk_config
           end
 
         end #libvirt
