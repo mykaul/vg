@@ -1,3 +1,4 @@
+.vagrant/
 dist/glusto.yml
 dist/hosts.ini
 .vagrant/

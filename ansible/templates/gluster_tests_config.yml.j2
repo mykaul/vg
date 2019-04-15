@@ -1,0 +1,105 @@
+log_file: /var/log/tests/gluster_tests.log
+log_level: DEBUG
+remote_user: root
+
+servers: &servers_list
+    {% for server in servers %}
+- {{server}}
+    {% endfor %}
+
+clients:
+    {% for client in clients %}
+- {{client}}
+    {% endfor %}
+
+servers_info:
+     {% for server in servers %}
+{{server}}: &server{{ loop.index }}
+         host: {{server}}
+         devices: ["/dev/vdb", "/dev/vdc", "/dev/vdd", "/dev/vde"]
+         brick_root: "/mnt"
+     {% endfor %}
+
+clients_info: 
+     {% for client in clients %}
+{{client}}: &client{{ loop.index }}
+         host: {{client}}
+     {% endfor %}
+
+gluster:
+    running_on_volumes: []
+    running_on_mounts: []
+
+    cluster_config:
+        smb: 
+            enable: False
+            users_info: &smb_users_info
+                'root':
+                    password: 'foobar'
+                    acl: ''
+                'user1':
+                    password: 'xyz'
+                    acl: ''
+                'user2':
+                    password: 'abc'
+                    acl: ''
+            ctdb_setup: True
+            ctdb_servers: []
+            ctdb_vips:
+                -   vip: vip1
+                    routing_prefix: '23'
+                    interface: 'eth0'
+                -   vip: vip2
+                    routing_prefix: '22'
+                    interface: 'eth0'
+            ctdb_metavol_brick_path: ''
+
+        nfs_ganesha:
+            enable: False
+            num_of_nfs_ganesha_nodes: 4
+            vips: []
+
+    volume_types:
+        distributed: &distributed
+            type: distributed
+            dist_count: 4
+            transport: tcp
+        replicated: &replicated
+            type: replicated
+            replica_count: 3
+            arbiter_count: 1
+            transport: tcp
+        distributed-replicated: &distributed-replicated
+            type: distributed-replicated
+            dist_count: 2
+            replica_count: 3
+            transport: tcp
+        dispersed: &dispersed
+            type: dispersed
+            disperse_count: 6
+            redundancy_count: 2
+            transport: tcp
+        distributed-dispersed: &distributed-dispersed
+            type: distributed-dispersed
+            dist_count: 2
+            disperse_count: 6
+            redundancy_count: 2
+            transport: tcp
+
+    volumes:
+        - &vol1
+            name: testvol
+            voltype: *replicated
+            servers: *servers_list
+            peers: []
+            smb:
+                enable: True
+                users_info: *smb_users_info
+    mounts:
+        - &mount5
+            protocol: 'cifs'
+            server: {{servers[0]}}
+            client: *client1
+            smbuser: 'user2'
+            smbpasswd: 'abc'
+

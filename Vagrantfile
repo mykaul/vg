@@ -2,7 +2,7 @@
 #
 
 
-node_data_disk_count = 3
+node_data_disk_count = 4
 driveletters = ('a'..'z').to_a
 disk_size = 501 #GB
 cpus = 1
@@ -103,7 +103,9 @@ Vagrant.configure(2) do |config|
 	  ansible.verbose = false
           ansible.inventory_path = "dist/hosts.ini"
           ansible.extra_vars = {
-            node_count: "#{node_count}"
+            node_count: "#{node_count}",
+            servers: (1..node_count).map { |n| "node-#{n}" % n },
+            clients: ["node-0"]
           }
         end
 	# Deploy Glusto and Gluster using Gluster-Ansible via node-0
@@ -111,7 +113,6 @@ Vagrant.configure(2) do |config|
           node.vm.provision "ansible" do |ansible|
             ansible.become = true
             ansible.playbook = "ansible/glusto.yml"
-            ansible.verbose = false
             ansible.limit = "node-0"
             ansible.inventory_path = "dist/hosts.ini"
           end

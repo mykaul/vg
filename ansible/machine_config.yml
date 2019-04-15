@@ -87,6 +87,8 @@
     - name: distribute SSH key
       command: "{{ item }}"
       with_sequence: start=0 end={{ node_count }} format="sshpass -p foobar ssh-copy-id -f -o StrictHostKeyChecking=no root@node-%01x"
+    - name: Create the Glusto tests config file
+      template: src=templates/gluster_tests_config.yml.j2 dest=/root/gluster_tests_config.yml
 - hosts: node-1
   gather_facts: false
   tasks:
