@@ -28,9 +28,6 @@
        - { vgname: 'vg_vdb', pvname: '/dev/vdb' }
        - { vgname: 'vg_vdc', pvname: '/dev/vdc' }
 
-     # Create a thick volume name
-     gluster_infra_thick_lvs:
-       - { vgname: 'vg_vdb', lvname: 'thicklv_1', size: '100G' }
 
      # Create thinpools
      gluster_infra_thinpools:
@@ -44,7 +41,6 @@
 
      # Mount the devices
      gluster_infra_mount_devices:
-       - { path: '/mnt/thicklv', vgname: 'vg_vdb', lvname: 'thicklv_1' }
        - { path: '/mnt/thinlv1', vgname: 'vg_vdb', lvname: 'vg_vdb_thinlv' }
        - { path: '/mnt/thinlv2', vgname: 'vg_vdc', lvname: 'vg_vdc_thinlv' }
 
@@ -53,7 +49,7 @@
      gluster_cluster_status: absent
      gluster_cluster_transport: 'tcp'
      gluster_cluster_force: 'yes'
-     gluster_cluster_bricks: '/mnt/thicklv/testvol,/mnt/thinlv1/testvol'
+     gluster_cluster_bricks: '/mnt/thinlv1/testvol'
      gluster_cluster_replica_count: "{{ node_count }}"
 
   roles:

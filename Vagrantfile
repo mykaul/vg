@@ -2,11 +2,11 @@
 #
 
 
-node_data_disk_count = 4
+node_data_disk_count = 5
 driveletters = ('a'..'z').to_a
 disk_size = 501 #GB
 cpus = 1
-memory = 824
+memory = 894
 
 node_count = 6 # node-0 is our client.
 
@@ -16,44 +16,13 @@ Vagrant.configure(2) do |config|
 
     require "fileutils"
     f = File.open("dist/hosts.ini","w")
-    g = File.open("dist/glusto.yml", "w")
     f.puts "node-0 ansible_host=192.168.250.10"
     f.puts ""
     f.puts "[gluster_servers]"
-    g.puts "log_level: DEBUG"
-    g.puts "log_file: /tmp/gluster_tests.log"
-    g.puts "servers:"
     (1..node_count).each do |num|
       f.puts "node-#{num} ansible_host=192.168.250.#{num+10}"
-      g.puts "  - node-#{num} "
     end
-    g.puts "clients:\n\  - node-0"
-    g.puts "servers_info:"
-    (1..node_count).each do |num|
-      g.puts "  node-#{num}: &server#{num}"
-      g.puts "    host: 192.168.250.#{num+10}"
-      g.print "    devices: ["
-      (1..(node_data_disk_count - 1)).each do |d|
-        g.print "\"/dev/vd#{driveletters[d]}\", "
-      end
-      g.puts "/dev/vd#{driveletters[node_data_disk_count]}]"
-      g.puts "    brick_root: \"/mnt\""
-    end
-    g.puts "clients_info:"
-    g.puts "  node-0: &client1"
-    g.puts "    host: 192.168.250.10"
-    g.puts "\ngluster:"
-    g.puts "  volume_types:"
-    g.puts "    distributed_replicated: &distributed_replicated"
-    g.puts "      type: \"distributed-replicated\""
-    g.puts "      dist_count: 2"
-    g.puts "      replica_count: 2"
-    g.puts "      transport: \"tcp\""
-    #g.puts "  smb_share_options:"
-    #g.puts "    group: \"metadata-cache\""
-    #g.puts "    cache-samba-metadata: \"on\""
     f.close
-    g.close
 
 
     (0..node_count).reverse_each do |num|
@@ -124,7 +93,7 @@ Vagrant.configure(2) do |config|
             PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ANSIBLE_CONFIG='/vagrant/ansible.cfg' ansible-playbook --limit="gluster_servers" --inventory-file=/vagrant/hosts.ini --extra-vars "node_count=#{node_count}" /vagrant/gluster.yml
 
             echo "Cleaning up created volume, before running tests..."
-            PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ANSIBLE_CONFIG='/vagrant/ansible.cfg' ansible-playbook --limit="node-1" --inventory-file=/vagrant/hosts.ini --extra-vars "node_count=#{node_count}" /vagrant/gluster-cleanup.yml
+            PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ANSIBLE_CONFIG='/vagrant/ansible.cfg' ansible-playbook --limit="node-1" --inventory-file=/vagrant/hosts.ini /vagrant/gluster-cleanup.yml
             SHELL
 	  end
         end

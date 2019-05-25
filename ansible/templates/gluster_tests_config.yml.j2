@@ -16,7 +16,7 @@ servers_info:
      {% for server in servers %}
 {{server}}: &server{{ loop.index }}
          host: {{server}}
-         devices: ["/dev/vdb", "/dev/vdc", "/dev/vdd", "/dev/vde"]
+         devices: ["/dev/vdb", "/dev/vdc", "/dev/vdd", "/dev/vde", "/dev/vdf"]
          brick_root: "/mnt"
      {% endfor %}
 
@@ -28,7 +28,7 @@ clients_info:
 
 gluster:
     running_on_volumes: []
-    running_on_mounts: []
+    running_on_mounts: ['glusterfs']
 
     cluster_config:
         smb: 
@@ -43,7 +43,7 @@ gluster:
                 'user2':
                     password: 'abc'
                     acl: ''
-            ctdb_setup: True
+            ctdb_setup: False
             ctdb_servers: []
             ctdb_vips:
                 -   vip: vip1
@@ -62,7 +62,7 @@ gluster:
     volume_types:
         distributed: &distributed
             type: distributed
-            dist_count: 4
+            dist_count: 3
             transport: tcp
         replicated: &replicated
             type: replicated
@@ -76,14 +76,14 @@ gluster:
             transport: tcp
         dispersed: &dispersed
             type: dispersed
-            disperse_count: 6
-            redundancy_count: 2
+            disperse_count: 3
+            redundancy_count: 1
             transport: tcp
         distributed-dispersed: &distributed-dispersed
             type: distributed-dispersed
             dist_count: 2
-            disperse_count: 6
-            redundancy_count: 2
+            disperse_count: 3
+            redundancy_count: 1
             transport: tcp
 
     volumes:
@@ -93,7 +93,7 @@ gluster:
             servers: *servers_list
             peers: []
             smb:
-                enable: True
+                enable: False
                 users_info: *smb_users_info
     mounts:
         - &mount5
