@@ -6,7 +6,7 @@ node_data_disk_count = 5
 driveletters = ('a'..'z').to_a
 disk_size = 501 #GB
 cpus = 1
-memory = 894
+memory = 994
 
 node_count = 6 # node-0 is our client.
 
@@ -41,7 +41,11 @@ Vagrant.configure(2) do |config|
           lvt.qemu_use_session = false
           lvt.storage_pool_name = "default"
           lvt.memory = "#{memory}"
-          lvt.cpus = "#{cpus}"
+          if num == 0
+            lvt.cpus = 2
+          else
+            lvt.cpus = "#{cpus}"
+          end
           lvt.nested = false
           lvt.cpu_mode = "host-passthrough"
           lvt.volume_cache = "writeback"

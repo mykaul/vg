@@ -21,6 +21,11 @@
         - { regexp: '^PasswordAuthentication\s+no', line: 'PasswordAuthentication yes' }
         - { regexp: '^[#]*PubkeyAuthentication\s+yes', line: 'PubkeyAuthentication yes' }
         - { regexp: '^[#]*PermitRootLogin\s+yes', line: 'PermitRootLogin yes' }
+    - name: Edit yum.conf to not install docs
+      lineinfile:
+        path: '/etc/yum.conf'
+        state: present
+        line: 'tstflags=nodocs'
     - name: Restart SSHd
       systemd:
         name: 'sshd'
