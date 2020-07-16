@@ -13,41 +13,48 @@
 
   - name: Install required packages
     yum:
-      name: ['git', 'python-setuptools']   # 'yum-plugin-copr'
+      name: ['gcc', 'git', 'python-setuptools', 'python3-devel']
       state: present
       disablerepo: "epel"
     retries: 10
     delay: 5
 
-  - name: Install pip from EPEL
+  - name: Install pip
     yum:
-      name: ['python2-pip']
+      name: ['python3-pip']
       state: present
-      enablerepo: "epel"
     retries: 10
     delay: 5
 
-  - name: upgrade pip itself
-    pip:
-      name: pip
-      extra_args: --upgrade
-
-  - name: clone glusto, glusto-tests
+  - name: clone glusto-tests
     git:
       repo: "{{ item.repo }}"
       dest: "{{ item.dest }}"
+      depth: 1
     with_items:
-      - {repo: "https://review.gluster.org/glusto-tests", dest: "~/glusto-tests" }
+      - {repo: "git://review.gluster.org/glusto-tests", dest: "~/glusto-tests" }
+    retries: 10
+    delay: 5
+
+  - name: clone glusto - python3_port4 branch
+    git:
+      repo: "{{ item.repo }}"
+      dest: "{{ item.dest }}"
+      depth: 1
+      version: "python3_port4"
+    with_items:
       - {repo: "https://github.com/loadtheaccumulator/glusto.git", dest: "~/glusto" }
     retries: 10
     delay: 5
+
   - name: Install and upgrade python packagess using pip
     pip:
-      name: ['setuptools', 'six', 'python-docx', 'tox']
+      name: ['wheel', 'setuptools', 'six', 'python-docx', 'tox', 'pyxattr', 'crefi', 'sh', 'numpy']
+      executable: '/bin/pip3'
       extra_args: --upgrade
 
   - name: Setup glusto
-    command: python setup.py install
+    command: python3 setup.py install
     args:
       chdir: "{{ item }}"
     with_items:

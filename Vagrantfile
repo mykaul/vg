@@ -6,7 +6,7 @@ node_data_disk_count = 5
 driveletters = ('a'..'z').to_a
 disk_size = 501 #GB
 cpus = 1
-memory = 994
+memory = 950
 
 node_count = 6 # node-0 is our client.
 
@@ -52,7 +52,7 @@ Vagrant.configure(2) do |config|
           lvt.graphics_type = "none"
           lvt.video_type = "vga"
           lvt.video_vram = 1
-          #lvt.usb_controller :model => "none"  # (requires vagrant-libvirt >= 0.44 which is in Fedora 30 only)
+          lvt.usb_controller :model => "none"  # (requires vagrant-libvirt >= 0.44 which is in Fedora 30 and up?)
           lvt.random :model => 'random'
           lvt.channel :type => 'unix', :target_name => 'org.qemu.guest_agent.0', :target_type => 'virtio'
           #disk_config
