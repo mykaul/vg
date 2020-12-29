@@ -51,7 +51,7 @@
       yum_repository:
         name: "gluster-nightly-master"
         description: "Gluster Nightly builds (master branch)"
-        baseurl: "http://artifacts.ci.centos.org/gluster/nightly/master/$releasever/$basearch"
+        baseurl: "http://artifacts.ci.centos.org/gluster/nightly/devel/$releasever/$basearch"
         gpgcheck: false
         repo_gpgcheck: false
         keepalive: yes
