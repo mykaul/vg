@@ -47,10 +47,10 @@
         gpgcheck: yes
         gpgkey: https://copr-be.cloud.fedoraproject.org/results/nigelbabu/arequal/pubkey.gpg
         repo_gpgcheck: no
-    - name: Configure Gluster master nightly repo
+    - name: Configure Gluster devel nightly repo
       yum_repository:
-        name: "gluster-nightly-master"
-        description: "Gluster Nightly builds (master branch)"
+        name: "gluster-nightly-devel"
+        description: "Gluster Nightly builds (devel branch)"
         baseurl: "http://artifacts.ci.centos.org/gluster/nightly/devel/$releasever/$basearch"
         gpgcheck: false
         repo_gpgcheck: false
@@ -83,7 +83,7 @@
         keepalive: yes
     - name: Install Gluster-ansible and additional packages on client
       yum:
-        name: ['gluster-ansible-roles', 'sshpass', 'glusterfs-fuse', 'cifs-utils', 'arequal']
+        name: ['gluster-ansible', 'sshpass', 'glusterfs-fuse', 'cifs-utils', 'arequal']
         state: present
       retries: 10
       delay: 5

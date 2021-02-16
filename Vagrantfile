@@ -58,7 +58,7 @@ Vagrant.configure(2) do |config|
           #disk_config
           if num != 0
             (1..(node_data_disk_count)).each do |d|
-              lvt.storage :file, :size => "#{disk_size}G", :serial => "#{d}"
+              lvt.storage :file, :size => "#{disk_size}G", :discard => 'unmap', :serial => "#{d}"
 	    end #disk_config
           end
 
