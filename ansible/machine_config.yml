@@ -60,7 +60,7 @@
   tasks:
     - name: Install Gluster and additional packages on servers
       yum:
-        name: ['python3', 'policycoreutils-python', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api', 'arequal']
+        name: ['python3', 'policycoreutils-python', 'glusterfs-server', 'glusterfs-fuse', 'glusterfs-api', 'arequal', 'glusterfs-geo-replication']
         state: present
       retries: 10
       delay: 5
